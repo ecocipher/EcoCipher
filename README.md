@@ -1,4 +1,4 @@
-EcoCipher: Bringing Full Privacy with Efficiency
+__EcoCipher: Bringing Full Privacy with Efficiency__
 
 EcoCipher is a cutting-edge privacy coin that leverages the CryptoNote protocol to provide users with fast transactions and complete privacy. Designed to address the growing concern for privacy in digital transactions, EcoCipher ensures that users can conduct their financial activities securely and anonymously.
 
