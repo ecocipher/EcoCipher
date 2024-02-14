@@ -103,11 +103,38 @@ bool Currency::getBlockReward(size_t medianSize, size_t currentBlockSize, uint64
 
   uint64_t baseReward = (m_moneySupply - alreadyGeneratedCoins) >> m_emissionSpeedFactor;
 
+  // Adjust block reward for the first 50,000 blocks
+  if (alreadyGeneratedCoins < (50000 * INITIAL_BLOCK_REWARD)) {
+    baseReward *= 10; // Increase block reward by 10x
+  }
+
   medianSize = std::max(medianSize, m_blockGrantedFullRewardZone);
   if (currentBlockSize > UINT64_C(2) * medianSize) {
     logger(TRACE) << "Block cumulative size is too big: " << currentBlockSize << ", expected less than " << 2 * medianSize;
     return false;
   }
+
+  // Apply block size penalty
+  if (currentBlockSize <= medianSize) {
+    reward = baseReward + fee;
+  } else {
+    size_t numberOfPenalty = currentBlockSize / medianSize;
+
+    // Maximum penalty is 2^6 = 64 times
+    if (numberOfPenalty >= 64) {
+      logger(TRACE) << "Block cumulative size is too big: " << currentBlockSize << ", expected less than " << 2 * medianSize;
+      return false;
+    }
+
+    baseReward = (baseReward >> 6); // Divide by 64
+    reward = baseReward + fee;
+    reward >>= numberOfPenalty;
+  }
+
+  emissionChange = 0;
+
+  return true;
+}
 
   uint64_t penalizedBaseReward = getPenalizedAmount(baseReward, medianSize, currentBlockSize);
   uint64_t penalizedFee = getPenalizedAmount(fee, medianSize, currentBlockSize);
